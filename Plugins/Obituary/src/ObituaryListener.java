@@ -112,7 +112,7 @@ public class ObituaryListener extends PluginListener {
         for(String key : keys){
             str = str.replaceAll(new StringBuilder("<").append(key).append(">").toString(),vars.get(key));
         }
-        str = str.replaceAll("<[cC]([0-9a-eA-E])>","§$1");
+        str = str.replaceAll("<[cC]([0-9a-fA-F])>","§$1");
         str = str.replaceAll("<n>( +[oOiIuUaAeE])","n$1");
         str = str.replaceAll("<n>","");
         return str;
@@ -182,8 +182,7 @@ public class ObituaryListener extends PluginListener {
         int i = message.indexOf(":");
         String name = "";
         if(i != -1){
-            message = message.toLowerCase();
-            name = message.substring(0, i);
+            name = message.substring(0, i).toLowerCase();
             message = message.substring(i+1);
         }
         if(!messages.containsKey(name)){

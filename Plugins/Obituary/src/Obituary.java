@@ -43,6 +43,7 @@ public class Obituary extends Plugin {
         for(PluginRegisteredListener listen : this.listeners){
             etc.getLoader().removeListener(listen);
         }
+        listeners.clear();
         log.log(Level.INFO, this.name+" Plugin Disabled.");
     }
     private void addListener(String hookName, String priorityName){
