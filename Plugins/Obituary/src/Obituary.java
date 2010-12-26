@@ -24,7 +24,7 @@ public class Obituary extends Plugin {
     private static final Logger log = Logger.getLogger("Minecraft");
     private String name = "Obituary";
     private List<PluginRegisteredListener> listeners = new ArrayList<PluginRegisteredListener>();
-    private final ObituaryListener listener = new ObituaryListener(this);
+    private final ObituaryListener listener = new ObituaryListener();
 
     public void enable(){
         addListener("DAMAGE","MEDIUM");
@@ -32,6 +32,11 @@ public class Obituary extends Plugin {
         addListener("DISCONNECT","MEDIUM");
         listener.loadMessages();
         log.log(Level.INFO, this.name+" Plugin Enabled.");
+        try{
+           in.class.getMethod("b", new Class[]{ep.class});
+        }catch(Exception ex){
+            log.log(Level.INFO,"Obituary plugin does not match server version?");
+        }
     }
 
     public void disable(){

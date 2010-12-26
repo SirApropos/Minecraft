@@ -23,13 +23,11 @@ import java.util.logging.Level;
 
 public class ObituaryListener extends PluginListener {
     private static final Logger log = Logger.getLogger("Minecraft");
-    private Obituary ob;
     private HashMap<String, ArrayList<String>> messages = new HashMap<String, ArrayList<String>>();
     private Random generator = new Random();
     private HashMap<Player, Object[]> pendingDeaths = new HashMap<Player, Object[]>();
 
-    public ObituaryListener(Obituary ob){
-        this.ob = ob;
+    public ObituaryListener(){
     }
 
     @Override
@@ -60,7 +58,6 @@ public class ObituaryListener extends PluginListener {
                 PluginLoader.DamageType type = (PluginLoader.DamageType)deathVars[0];
                 BaseEntity attacker = (BaseEntity)deathVars[1];
                 int amount = (Integer)deathVars[2];
-                player.setDeathTicks(3);
                 vars.put("damage",Integer.toString(amount));
                 vars.put("message",getMessage(type));
                 if(attacker != null){
@@ -71,7 +68,7 @@ public class ObituaryListener extends PluginListener {
                         if(!killer.getName().equals(player.getName())){
                             vars.put("killer",killer.getName());
                             String item = etc.getDataSource().getItem(killer.getItemInHand());
-                            if(item == "-1") item = "bare hands";
+                            if(item.equals("-1")) item = "bare hands";
                             vars.put("item", item);
                             if(dist > 3.0){
                                 vars.put("message", getMessage("ranged"));
@@ -82,10 +79,13 @@ public class ObituaryListener extends PluginListener {
                             vars.put("message", getMessage("suicide"));
                         }
                     }else if(attacker.isMob()){
-                        if(!in.b(attacker.getEntity()).equalsIgnoreCase("creeper")){
+                        try{
                             vars.put("killer",in.b(attacker.getEntity()));
-                        }else{
-                            vars.put("message",getMessage("creeper"));
+                            if(in.b(attacker.getEntity()).equalsIgnoreCase("creeper")){
+                                vars.put("message",getMessage("creeper"));
+                            }
+                        } catch (Exception ex) {
+                            vars.put("killer","mob");
                         }
                     }else if(attacker.isAnimal()){
                         vars.put("killer","animal");
