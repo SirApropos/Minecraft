@@ -31,7 +31,11 @@ public class ObituaryListener extends PluginListener {
 
     public ObituaryListener(){
     }
-
+    public boolean onDamage(PluginLoader.DamageType type, BaseEntity attacker, BaseEntity defender, float amount) {
+            //For compatibility.
+            return onDamage(type, attacker, defender, (int)amount);
+    }
+    
     @Override
     public boolean onDamage(PluginLoader.DamageType type, BaseEntity attacker, BaseEntity defender, int amount) {
         if(defender != null && defender.isPlayer()){
@@ -172,7 +176,7 @@ public class ObituaryListener extends PluginListener {
         String str = "";
         switch(type){
             case CREEPER_EXPLOSION:
-                str = "creeper";
+                    str = "entity";
                 break;
             case FIRE_TICK:
                 if(messages.containsKey("fire_tick")){

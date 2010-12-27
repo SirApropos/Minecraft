@@ -1,3 +1,7 @@
+V1.11 - 12/27/2010
+-Added dummy onDamage() to stop errors being thrown by older versions of hMod.
+-Removed need for 'creeper' death message. Creeper is now handled like any other mob.
+
 V1.1 - 12/27/2010
 -Added patch to fix Minecraft bug wherein player is kicked or crashes if they die while in a vehicle.
 -Added fire_tick specific message.
