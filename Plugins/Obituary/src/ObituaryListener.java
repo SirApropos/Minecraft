@@ -20,6 +20,8 @@ import java.util.Random;
 import java.io.*;
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.List;
+import java.util.Arrays;
 
 public class ObituaryListener extends PluginListener {
     private static final Logger log = Logger.getLogger("Minecraft");
@@ -34,10 +36,11 @@ public class ObituaryListener extends PluginListener {
     public boolean onDamage(PluginLoader.DamageType type, BaseEntity attacker, BaseEntity defender, int amount) {
         if(defender != null && defender.isPlayer()){
             Player player = defender.getPlayer();
-            if(player.getHealth() <= 0 || player.getHealth()>0 && player.getHealth() <= amount){
+            if(player.getHealth()>0 && player.getHealth() <= amount){
                 if(type == PluginLoader.DamageType.FIRE){
-                    Block block = etc.getServer().getBlockAt((int)Math.floor(player.getX()), (int)Math.floor(player.getY()),(int)Math.floor(player.getZ()));
-                    if(block.getType() == 10 || block.getType() == 11){
+                    Block block1 = getBlockAtPlayer(player, 0);
+                    Block block2 = getBlockAtPlayer(player, 1);
+                    if(block1.getType() == 10 || block1.getType() == 11 || block2.getType() == 10 || block2.getType() == 11){
                         type = PluginLoader.DamageType.LAVA;
                     }
                 }
@@ -50,6 +53,17 @@ public class ObituaryListener extends PluginListener {
     @Override
     public boolean onHealthChange(Player player, int oldValue, int newValue) {
         if(newValue <= 0){
+            for(BaseVehicle vehicle : etc.getServer().getVehicleEntityList()){
+                //If player dies while in a vehicle, don't crash.
+                if(vehicle.getPassenger().equals(player)){
+                    if(vehicle instanceof Minecart){
+                        etc.getServer().dropItem(player.getLocation(), 328);
+                    }else if(vehicle instanceof Boat){
+                        etc.getServer().dropItem(player.getLocation(), 333);
+                    }
+                    vehicle.destroy();
+                }
+            }
             HashMap<String, String> vars = new HashMap<String,String>();
             vars.put("player",player.getName());
             if(pendingDeaths.containsKey(player)){
@@ -80,9 +94,11 @@ public class ObituaryListener extends PluginListener {
                         }
                     }else if(attacker.isMob()){
                         try{
-                            vars.put("killer",in.b(attacker.getEntity()));
-                            if(in.b(attacker.getEntity()).equalsIgnoreCase("creeper")){
-                                vars.put("message",getMessage("creeper"));
+                            String name = in.b(attacker.getEntity());
+                            vars.put("killer",name);
+                            name = name.toLowerCase();
+                            if(messages.containsKey(name)){
+                                vars.put("message",getMessage(name));
                             }
                         } catch (Exception ex) {
                             vars.put("killer","mob");
@@ -94,11 +110,21 @@ public class ObituaryListener extends PluginListener {
                     }
                 }
             }else{
-                vars.put("message",getMessage("unknown"));
+                Block block1 = getBlockAtPlayer(player, 1);
+                Block block2 = getBlockAtPlayer(player, 0);
+                List<Integer> safeBlocks = Arrays.asList(0,6,8,9,10,11,37,38,39,40,44,51,53,55,63,64,65,66,67,68,69,70,71,72,75,76,77,78,83,85,90);
+                if(safeBlocks.contains(block1.getType()) && safeBlocks.contains(block2.getType())){
+                    vars.put("message",getMessage("unknown"));
+                }else{
+                    vars.put("message",getMessage("suffocate"));
+                }
             }
             broadcastMessage(createDeathMessage(vars));
         }
         return false;
+    }
+    private Block getBlockAtPlayer(Player player, int yOffset){
+        return etc.getServer().getBlockAt((int)Math.floor(player.getX()), (int)Math.floor(player.getY())+yOffset,(int)Math.floor(player.getZ()));
     }
 @Override
     public void onDisconnect(Player player){
@@ -130,7 +156,7 @@ public class ObituaryListener extends PluginListener {
         double y = entity1.getY()-entity2.getY();
         double z = entity1.getZ()-entity2.getZ();
         dist = Math.sqrt(Math.pow(x,2) + Math.pow(y,2) + Math.pow(z,2));
-        dist = Math.round(dist*100)/100;
+        dist = Math.round(dist*100.00)/100.00;
         return dist;
     }
     private String getMessage(String string){
@@ -149,7 +175,11 @@ public class ObituaryListener extends PluginListener {
                 str = "creeper";
                 break;
             case FIRE_TICK:
-                str = "fire";
+                if(messages.containsKey("fire_tick")){
+                    str = "fire_tick";
+                }else{
+                    str = "fire";
+                }
                 break;
             default:
                 str = type.toString().toLowerCase();
@@ -159,6 +189,7 @@ public class ObituaryListener extends PluginListener {
     }
 
     public void loadMessages(){
+        messages.clear();
         File file = new File("obituary_messages.txt");
         if(file.exists()){
             try {

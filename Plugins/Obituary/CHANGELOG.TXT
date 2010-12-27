@@ -1,2 +1,8 @@
+V1.1 - 12/27/2010
+-Added fire_tick specific message.
+-Added suffocation death message.
+-Added mob-specific death messages.
+-Fixed bug wherein cached messages weren't cleared when the plugin was reloaded.
+
 V1.0 - 12/26/2010
-Initial Version
+-Initial Version

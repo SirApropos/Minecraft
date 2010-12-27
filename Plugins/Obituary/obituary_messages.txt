@@ -1,11 +1,14 @@
 lava:<cc><player> fell into lava.
 water:<cc><player> has drowned.
+suffocate:<cc><player> has suffocated.
 creeper:<cc><player> was blown up by a creeper.
 entity:<cc><player> was killed by <killer>.
 player:<cc><killer> killed <player> with a<n> <item>.
 ranged:<cc><killer> killed <player> with a<n> <item> at a range of <distance>m.
+skeleton:<cc>Skeleton killed <player> at a range of <distance>m.
 fall:<cc><player> fell to his death.
-fire:<cc><player> burned to death.
+fire_tick:<cc><player> burned to death.
+fire:<cc><player> fell into a fire.
 cactus:<cc><player> died to a cactus. Come on, really?
 explosion:<cc><player> died to an explosion.
 suicide:<cc><player> killed himself.
