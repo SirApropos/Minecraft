@@ -1,3 +1,6 @@
+v1.12 - 12/27/2010
+-Fixed major bug causing NullPointerExceptions.
+
 V1.11 - 12/27/2010
 -Added dummy onDamage() to stop errors being thrown by older versions of hMod.
 -Removed need for 'creeper' death message. Creeper is now handled like any other mob.

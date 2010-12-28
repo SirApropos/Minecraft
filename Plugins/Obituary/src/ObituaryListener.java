@@ -57,9 +57,9 @@ public class ObituaryListener extends PluginListener {
     @Override
     public boolean onHealthChange(Player player, int oldValue, int newValue) {
         if(newValue <= 0){
-            for(BaseVehicle vehicle : etc.getServer().getVehicleEntityList()){
+           for(BaseVehicle vehicle : etc.getServer().getVehicleEntityList()){
                 //If player dies while in a vehicle, don't crash.
-                if(vehicle.getPassenger().equals(player)){
+                if(vehicle != null && vehicle.getPassenger() != null && vehicle.getPassenger().equals(player)){
                     if(vehicle instanceof Minecart){
                         etc.getServer().dropItem(player.getLocation(), 328);
                     }else if(vehicle instanceof Boat){
@@ -176,7 +176,7 @@ public class ObituaryListener extends PluginListener {
         String str = "";
         switch(type){
             case CREEPER_EXPLOSION:
-                    str = "entity";
+                str = "entity";
                 break;
             case FIRE_TICK:
                 if(messages.containsKey("fire_tick")){
