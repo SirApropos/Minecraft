@@ -13,6 +13,10 @@ This plugin requires build 131+ of hMod.
 Place Obituary.jar into Plugins folder. Add "Obituary" to plugins line of server.properties. Open
 Obituary.jar in WinRar or the like. Copy obituary_messages.txt from into the main server folder.
 
+As of version 1.2, you may create an "obituary.txt" file to enable some additional options. Creating this file is only necessary if you wish
+to access these options. The file will populate with available options when the plugin is enabled the first time. By default, they are both set
+to "false". Note that this file will only be populated after the file is manually created. It will not automatically create the file.
+
 ========================
 [1.1]obituary_messages.txt
 ========================

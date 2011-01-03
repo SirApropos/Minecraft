@@ -28,9 +28,22 @@ public class ObituaryListener extends PluginListener {
     private HashMap<String, ArrayList<String>> messages = new HashMap<String, ArrayList<String>>();
     private Random generator = new Random();
     private HashMap<Player, Object[]> pendingDeaths = new HashMap<Player, Object[]>();
+    private int logging = 0x0;
 
     public ObituaryListener(){
     }
+@Override
+    public void onDisconnect(Player player){
+        if(pendingDeaths.containsKey(player)) pendingDeaths.remove(player);
+    }
+
+@Override
+    public void onLogin(Player player) {
+        if(player.getHealth() <= 0){
+            pendingDeaths.put(player, new Object[]{null});
+        }
+    }
+
     public boolean onDamage(PluginLoader.DamageType type, BaseEntity attacker, BaseEntity defender, float amount) {
             //For compatibility.
             return onDamage(type, attacker, defender, (int)amount);
@@ -72,6 +85,10 @@ public class ObituaryListener extends PluginListener {
             vars.put("player",player.getName());
             if(pendingDeaths.containsKey(player)){
                 Object[] deathVars = pendingDeaths.get(player);
+                if(deathVars[0] == null){
+                    //Bad form, but no better way, really.
+                    return false;
+                }
                 pendingDeaths.remove(player);
                 PluginLoader.DamageType type = (PluginLoader.DamageType)deathVars[0];
                 BaseEntity attacker = (BaseEntity)deathVars[1];
@@ -130,10 +147,6 @@ public class ObituaryListener extends PluginListener {
     private Block getBlockAtPlayer(Player player, int yOffset){
         return etc.getServer().getBlockAt((int)Math.floor(player.getX()), (int)Math.floor(player.getY())+yOffset,(int)Math.floor(player.getZ()));
     }
-@Override
-    public void onDisconnect(Player player){
-        if(pendingDeaths.containsKey(player)) pendingDeaths.remove(player);
-    }
 
     private String createDeathMessage(HashMap<String,String> vars){
         String str = vars.get("message");
@@ -151,6 +164,16 @@ public class ObituaryListener extends PluginListener {
     private void broadcastMessage(String message){
         for(Player player : etc.getServer().getPlayerList()){
             player.sendMessage(message);
+        }
+        message = message.replaceAll("§[0-9a-fA-F]","");
+        int temp = logging;
+        if(temp >= 0x2){
+            etc.getLoader().callCustomHook("tweet", new Object[]{message});
+            temp -= 0x2;
+        }
+
+        if(temp == 0x1){
+            log.log(Level.INFO, message);
         }
     }
 
@@ -192,7 +215,18 @@ public class ObituaryListener extends PluginListener {
         return getMessage(str);
     }
 
-    public void loadMessages(){
+    public void enable(){
+        loadMessages();
+        File file = new File("obituary.txt");
+        logging =  0x0;
+        if(file.exists() && file.canRead()){
+            PropertiesFile config = new PropertiesFile("obituary.txt");
+            if(config.getBoolean("log_to_console",false)) logging+=0x1;
+            if(config.getBoolean("log_to_twitter",false)) logging+=0x2;
+        }
+    }
+
+    private void loadMessages(){
         messages.clear();
         File file = new File("obituary_messages.txt");
         if(file.exists()){

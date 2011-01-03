@@ -1,3 +1,7 @@
+v1.2 - 01/02/2011
+-Added log_to_console and log_to_twitter (TwitterEvents required) options in obituary.txt.
+-Fixed bug wherein players who logged in while dead would trigger a death message.
+
 v1.12 - 12/27/2010
 -Fixed major bug causing NullPointerExceptions.
 

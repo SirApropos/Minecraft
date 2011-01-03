@@ -30,12 +30,13 @@ public class Obituary extends Plugin {
         addListener("DAMAGE","MEDIUM");
         addListener("HEALTH_CHANGE","MEDIUM");
         addListener("DISCONNECT","MEDIUM");
-        listener.loadMessages();
+        addListener("LOGIN","MEDIUM");
+        listener.enable();
         log.log(Level.INFO, this.name+" Plugin Enabled.");
         try{
            in.class.getMethod("b", new Class[]{ep.class});
         }catch(Exception ex){
-            log.log(Level.INFO,"Obituary plugin does not match server version?");
+            log.log(Level.WARNING,"Obituary plugin does not match server version?");
         }
     }
 
@@ -46,6 +47,7 @@ public class Obituary extends Plugin {
         listeners.clear();
         log.log(Level.INFO, this.name+" Plugin Disabled.");
     }
+    
     private void addListener(String hookName, String priorityName){
         try{
             PluginLoader.Hook hook = PluginLoader.Hook.valueOf(hookName.toUpperCase());
