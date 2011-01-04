@@ -167,11 +167,14 @@ public class WirelessPowerConfig {
     }
 
     public double getBasePower(){
-        return 15.0;
+        return transmitterBasePower;
     }
 
     public double getBoost(Block block){
-        return 1.0;
+        double boost = 1.0;
+        int type = block.getType();
+        if(boosterBlocks.containsKey(type)) boost = boosterBlocks.get(type);
+        return boost;
     }
 
     public boolean checkPermission(Player player, Event event){

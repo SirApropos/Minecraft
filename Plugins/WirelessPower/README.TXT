@@ -12,7 +12,7 @@ This plugin requires build 126+ of hMod.
 ========================
 [1.0]Installation Instructions
 ========================
-Place Obituary.jar into Plugins folder. Add "WirelessPower" to plugins line of server.properties.
+Place WirelessPower.jar into Plugins folder. Add "WirelessPower" to plugins line of server.properties.
 You must also set up a SQL table in your Minecraft database. See section 1.1 for details.
 WirelessPower.properties will be created on the first time the plugin is enabled. See 1.2 for configuration details.
 
