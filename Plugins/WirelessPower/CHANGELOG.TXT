@@ -1,2 +1,7 @@
-V1.0 - 01/04/2010
+V1.1 - 01/04/2011
+-Added Flatfile support.
+-Removed debug information (console logging)
+-Various bugfixes.
+
+V1.0 - 01/04/2011
 -Initial Version

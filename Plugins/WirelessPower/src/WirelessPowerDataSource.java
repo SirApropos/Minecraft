@@ -22,10 +22,11 @@ public abstract class WirelessPowerDataSource {
 
     public static WirelessPowerDataSource create() {
         WirelessPowerDataSource datasource;
-        if(WirelessPower.config.getBoolean("use-mysql",true)){
-            datasource = new WirelessPowerMysqlSource(new Mysql(etc.getSQLConnection()),WirelessPower.config.getString("table-name","transmitters"));
+        PropertiesFile config = new PropertiesFile("WirelessPower.properties");
+        if(config.getBoolean("use_mysql",false)){
+            datasource = new WirelessPowerMysqlSource(new Mysql(etc.getSQLConnection()),config.getString("mysql_table","transmitters"));
         }else{
-            datasource = null;
+            datasource = new WirelessPowerFileSource(config.getString("transmitters_file","transmitters.dat"));
         }
         return datasource;
     }

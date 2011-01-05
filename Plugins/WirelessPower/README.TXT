@@ -5,7 +5,7 @@ WirelessPower Plugin for hMod (Created by Apropos <Apropos.of.nothing@gmx.com>)
 This plugin requires build 126+ of hMod.
 
 [1.0] Installation Instructions
-	[1.1] Setting up the MySQL table
+	[1.1] Setting up MySQL
 	[1.2] WirelessPower.properties
 [2.0] Usage
 
@@ -17,9 +17,9 @@ You must also set up a SQL table in your Minecraft database. See section 1.1 for
 WirelessPower.properties will be created on the first time the plugin is enabled. See 1.2 for configuration details.
 
 ========================
-[1.2]Setting up the MySQL table
+[1.2]Setting up MySQL
 ========================
-A .SQL file is included in WirelessPower.jar. Run the query in whatever administration you use for your SQL database.
+First, change the use_mysql option in WirelessPower.properties to 'true'. Change mysql_table to reflect the table in your database. A .SQL file is included in WirelessPower.jar (also found here. Run the query in whatever administration you use for your SQL database.
 
 ========================
 [1.2]WirelessPower.properties
@@ -29,11 +29,13 @@ There are three types of entries that can be added. Vars, permissions or boosts.
 Vars are in the format of "[var]=[value]".
 ex:protect_transmitters=false
 
-There are two vars that can currently be changed.
+Below are the vars that can currently be changed.
     -protect_transmitters (boolean, default false)       | Whether liquids can flow to the transmitter or
                                                          | players can destroy other's transmitters.
-    -base_power (double, default 15.0)                   | The base range in meters of a transmitter.
-
+    -base_power (double, default: 15.0)                   | The base range in meters of a transmitter.
+	-use_mysql (boolean, default: false)
+	-transmitters_file (string, default: transmitters.dat)
+	-mysql_table (string, default: transmitters)
 Permissions are in the format of "perm:[user|group]:[name]:[type]:[value]".
 ex:perm:group:admins:maxtransmitters:-1
 

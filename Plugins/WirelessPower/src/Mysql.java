@@ -72,7 +72,6 @@ public class Mysql {
             result = this.connection.prepareStatement(query).executeQuery();
         }catch(SQLException ex){
             handleException(ex);
-            System.out.println(query);
         }
         return result;
     }
@@ -83,7 +82,6 @@ public class Mysql {
             result = this.connection.prepareStatement(query).executeUpdate() > 0 ? true : false;
         }catch(SQLException ex){
             handleException(ex);
-            System.out.println(query);
         }
         return result;
     }

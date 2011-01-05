@@ -25,13 +25,13 @@ public class WirelessPower extends Plugin{
     private final WirelessPowerDataSource data = WirelessPowerDataSource.create();
     private final WirelessPowerMonitor monitor = new WirelessPowerMonitor(this.data);
     private final WirelessPowerListener listener = new WirelessPowerListener(this.monitor);
-    public static final PropertiesFile config = new PropertiesFile("WirelessPower.txt");
     private static final Logger log = Logger.getLogger("Minecraft");
 
     public WirelessPower(){
     }
 
     public void enable(){
+
         log.log(Level.INFO, this.name+" Plugin Enabled.");
         this.monitor.loadConfig();
         this.monitor.load();

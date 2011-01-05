@@ -31,6 +31,10 @@ public class WirelessPowerConfig {
     private Double transmitterBasePower = 15.0;
     private Map<Integer,Double> boosterBlocks = new HashMap<Integer,Double>();
     private WirelessPowerMonitor monitor;
+    private String table = "Transmitters";
+    private Boolean mysql = false;
+    private String file = "transmitters.dat";
+
     public enum Event{
         createTransmitter("maxtransmitters"),
         createChannel("createchannel");
@@ -98,6 +102,9 @@ public class WirelessPowerConfig {
         List<String> lines = new ArrayList<String>();
         lines.add("protect_transmitters="+Boolean.toString(protectTransmitters));
         lines.add("base_power="+Double.toString(transmitterBasePower));
+        lines.add("use_mysql="+Boolean.toString(mysql));
+        lines.add("transmitters_file="+file);
+        lines.add("mysql_table="+table);
         StringBuilder line;
         for(Object key : boosterBlocks.keySet().toArray()){
             int blockType = (Integer)key;
@@ -137,6 +144,9 @@ public class WirelessPowerConfig {
         }
         if(vars.containsKey("base_power")){
             transmitterBasePower = Double.parseDouble(vars.get("base_power"));
+        }
+        if(vars.containsKey("mysql_table")){
+            table = vars.get("mysql_table");
         }
     }
 

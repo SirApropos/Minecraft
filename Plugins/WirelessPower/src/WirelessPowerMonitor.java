@@ -27,9 +27,6 @@ public class WirelessPowerMonitor {
     private WirelessPowerDataSource datasource;
 
     public WirelessPowerMonitor(WirelessPowerDataSource localdatasource){
-        this.transmitters.put(Transmitter.Type.RECEIVER, new HashMap<String,ArrayList<Transmitter>>());
-        this.transmitters.put(Transmitter.Type.TRANSMITTER, new HashMap<String,ArrayList<Transmitter>>());
-        this.transmitters.put(Transmitter.Type.REPEATER, new HashMap<String,ArrayList<Transmitter>>());
         this.datasource = localdatasource;
     }
 
@@ -256,6 +253,11 @@ public class WirelessPowerMonitor {
     }
 
     public void load(){
+        this.transmitters.clear();
+        this.watched.clear();
+        this.transmitters.put(Transmitter.Type.RECEIVER, new HashMap<String,ArrayList<Transmitter>>());
+        this.transmitters.put(Transmitter.Type.TRANSMITTER, new HashMap<String,ArrayList<Transmitter>>());
+        this.transmitters.put(Transmitter.Type.REPEATER, new HashMap<String,ArrayList<Transmitter>>());
         this.datasource.load(this);
     }
 

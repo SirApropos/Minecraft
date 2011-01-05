@@ -22,7 +22,6 @@ public class WirelessPowerListener extends PluginListener {
     private List<Player> players = new ArrayList<Player>();
     private static WirelessPowerMonitor monitor;
     private static final Logger log = Logger.getLogger("Minecraft");
-    private boolean protectTransmitters = true;
 
     public WirelessPowerListener(WirelessPowerMonitor localMonitor){
         monitor = localMonitor;
