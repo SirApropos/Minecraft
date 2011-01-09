@@ -23,11 +23,12 @@ public class Platform {
     private ArrayList<Block> ringBlocks = new ArrayList<Block>();
     private int[][] shape;
     private int height=5;
-    private int currentFrame = -1;
+    private int currentFrame = 0;
     private int teleportFrame = 14;
     private ArrayList<Integer> protectedFrames = new ArrayList<Integer>();
     private HashMap<Integer, int[]> pruneFrames = new HashMap<Integer, int[]>();
     private ArrayList<Integer> exclude = new ArrayList<Integer>();
+    private ArrayList<Integer> special = new ArrayList<Integer>();
 
     public Platform(Block center, int[][] shape, int height){
         this.center = center;
@@ -45,9 +46,13 @@ public class Platform {
         for(int i : new int[]{0,8,9,10,11,18,20,51,64,68,71,78,90}){
             exclude.add(i);
         }
+        for(int i : new int[]{6,18,37,38,39,40,50,59,63,64,65,68,69,71,75,76,83,90}){
+            special.add(i);
+        }
     }
 
     public void nextFrame(){
+        try{
         currentFrame++;
         if(pruneFrames.containsKey(currentFrame)){
             prune();
@@ -55,6 +60,13 @@ public class Platform {
         if(currentFrame <  frames.size()){
             for(int[] frame : frames.get(currentFrame)){
                 setBlocks(frame[0],frame[1]);
+            }
+        }
+        }catch(ArrayIndexOutOfBoundsException ex){
+            if(currentFrame>0){
+                currentFrame = -1;
+                nextFrame();
+                currentFrame = frames.size();
             }
         }
     }
@@ -82,6 +94,7 @@ public class Platform {
     }
 
     private void createFrames(){
+        addFrame(new int[][]{{1,0},{2,0},{3,0},{4,0},{5,0}}); //Special frame to remove everything if error occurs.
         pruneFrame(addFrame(new int[][]{{1,49}}),new int[]{1});
         pruneFrame(addFrame(new int[][]{{1,0},{3,49}}),new int[]{2,3});
         pruneFrame(addFrame(new int[][]{{3,0},{4,49}}),new int[]{4});
@@ -135,16 +148,19 @@ public class Platform {
         ArrayList<Block> blockList = new ArrayList<Block>();
         ArrayList<Player> playerList = new ArrayList<Player>();
         Block[][][] blockArray = new Block[shape.length][shape.length][5];
+        Block[][][] specialArray = new Block[shape.length][shape.length][5];
         int mod = (int)((shape.length - 1)/2);
         for(int y = 1;y<=height;y++){
             for(int i=0;i<shape.length;i++){
                 for(int j=0;j<shape.length;j++){
                     if(shape[i][j] == 2){
                         Block block = center.getRelative(i-mod, y, j-mod);
-                        if(block.getType() > 0){
-                        }
                         blockList.add(block);
-                        blockArray[i][j][y-1] = block;
+                        if(special.contains(block.getType())){
+                            specialArray[i][j][y-1] = block;
+                        }else{
+                            blockArray[i][j][y-1] = block;
+                        }
                     }else{
                         blockArray[i][j][y-1] = null;
                     }
@@ -158,21 +174,53 @@ public class Platform {
             }
         }
         contents.put("blocks",blockArray);
+        contents.put("special",specialArray);
         contents.put("players",playerList);
         return contents;
     }
 
     public void setContents(HashMap<String, Object> contents){
-        Block[][][] blocks = (Block[][][])contents.get("blocks");
-        int mod = (int)((blocks.length - 1)/2);
-        int offset = center.getY() - blocks[mod][mod][0].getY()+1;
+        Block[][][] blockArray = (Block[][][])contents.get("blocks");
+        Block[][][] specialArray = (Block[][][])contents.get("special");
+        int mod = (int)((blockArray.length - 1)/2);
+        int offset = center.getY() - blockArray[mod][mod][0].getY()+1;
         for(int y = 1;y<=height;y++){
-            for(int i=0;i<blocks.length;i++){
-                for(int j=0;j<blocks.length;j++){
-                    if(blocks[i][j][y-1] != null){
+            for(int i=0;i<blockArray.length;i++){
+                for(int j=0;j<blockArray.length;j++){
+                    if(blockArray[i][j][y-1] != null){
                         Block block = center.getRelative(i-mod, y, j-mod);
-                        block.setType(blocks[i][j][y-1].getType());
+                        block.setType(blockArray[i][j][y-1].getType());
                         block.update();
+                    }
+                }
+            }
+        }
+        for(int y = 1;y<=height;y++){
+            for(int i=0;i<specialArray.length;i++){
+                for(int j=0;j<specialArray.length;j++){
+                    if(specialArray[i][j][y-1] != null){
+                        Block block = center.getRelative(i-mod, y, j-mod);
+                        block.setType(specialArray[i][j][y-1].getType());
+                        if( y < height - 2 && (block.getType() == 64 || block.getType() == 71) && block.getType() == specialArray[i][j][y].getType()){
+                            block.setData(0x4);
+                            Block door = center.getRelative(i-mod, y+1, j-mod);
+                            door.setType(specialArray[i][j][y-1].getType());
+                            door.setData(0x8);
+                            specialArray[i][j][y] = null;
+                            door.update();
+                        }else{
+                            block.setData(specialArray[i][j][y-1].getData());
+                        }
+                        block.update();
+                        if(block.getType()==63 || block.getType() == 68){
+                            Sign sign = (Sign)etc.getServer().getComplexBlock(block);
+                            Sign original = (Sign)etc.getServer().getComplexBlock(specialArray[i][j][y-1]);
+                            if(sign != null && original!=null){
+                                for(i=0;i<3;i++){
+                                    sign.setText(i, original.getText(i));
+                                }
+                            }
+                        }
                     }
                 }
             }

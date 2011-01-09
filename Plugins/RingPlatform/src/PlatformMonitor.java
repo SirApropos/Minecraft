@@ -47,8 +47,25 @@ public class PlatformMonitor {
     }
 
     public void animate(ArrayList<Platform> platforms){
-        animations.add(platforms);
-        nextFrame(platforms);
+        boolean result = true;
+        Loop:
+        for(ArrayList<Platform> animation : animations){
+            for(Platform animPlatform : animation){
+                for(Platform platform : platforms){
+                    int x = Math.abs(platform.getCenter().getX()- animPlatform.getCenter().getX());
+                    int y = Math.abs(platform.getCenter().getY()- animPlatform.getCenter().getY());
+                    int z = Math.abs(platform.getCenter().getZ()- animPlatform.getCenter().getZ());
+                    if((x < 5 || z < 5) && (y > 0 && y < 6)){
+                        result = false;
+                        break Loop;
+                    }
+                }
+            }
+        }
+        if(result){
+            animations.add(platforms);
+            nextFrame(platforms);
+        }
     }
 
     private void teleport(ArrayList<Platform> platforms){

@@ -1,5 +1,10 @@
-V1.01 - 01/08/2010
+V1.02 - 01/09/2011
+-Fixed bug wherein overlapping platforms could be activated simultaneously.
+-Fixed bug wherein torches, ladders, paintings, etc. would not transfer properly and sometimes become duplicated.
+-Possibly catching an occasional crash.
+
+V1.01 - 01/08/2011
 -Fixed one bugged frame of animation.
 
-V1.0 - 01/08/2010
+V1.0 - 01/08/2011
 -Initial Version

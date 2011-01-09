@@ -25,7 +25,7 @@ Create two or more platforms exactly vertically above each other in the followin
 
 0 = any block
 1 = Any given type. All 1s must be the same type.
-2 = Any given type. All 1s must be the same type.
+2 = Any given type. All 2s must be the same type.
 
 Platforms must use the same block 1 in order to teleport between each other. Platforms must be at least six blocks away
 from each other. Just right click a platform to teleport to another platform. If there are more than two platforms, each
