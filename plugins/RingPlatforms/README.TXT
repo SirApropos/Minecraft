@@ -10,7 +10,7 @@ This plugin requires build 131+ of hMod.
 ========================
 [1.0]Installation Instructions
 ========================
-Place RingPlatforms.jar into Plugins folder. Add "RingPlatforms" to plugins line of server.properties.
+Place RingPlatform.jar into Plugins folder. Add "RingPlatform" to plugins line of server.properties.
 
 ========================
 [2.0]Usage instructions
