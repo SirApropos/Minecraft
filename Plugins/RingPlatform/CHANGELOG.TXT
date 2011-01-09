@@ -1,2 +1,5 @@
+V1.01 - 01/08/2010
+-Fixed one bugged frame of animation.
+
 V1.0 - 01/08/2010
 -Initial Version

@@ -103,7 +103,7 @@ public class Platform {
         addFrame(new int[][]{{1,0}});
         addFrame(new int[][]{{3,0},{2,49}});
         addFrame(new int[][]{{2,0},{1,49}});
-        addFrame(new int[][]{{1,0},{1,49}});
+        addFrame(new int[][]{{1,0}});
         addFrame(new int[][]{{5,0},{4,49}});
         addFrame(new int[][]{{4,0},{3,49}});
         addFrame(new int[][]{{3,0},{1,49}});
