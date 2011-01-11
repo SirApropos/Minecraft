@@ -25,6 +25,7 @@ public class RingPlatform extends Plugin {
     private String name = "RingPlatform";
     private List<PluginRegisteredListener> listeners = new ArrayList<PluginRegisteredListener>();
     private final RingPlatformListener listener = new RingPlatformListener();
+    private static final boolean debug = true;
 
     public void enable(){
         addListener("BLOCK_RIGHTCLICKED","MEDIUM");
@@ -56,5 +57,9 @@ public class RingPlatform extends Plugin {
     public static void debug(Object obj){
         Player player = etc.getServer().getPlayer("Apropos");
         if(player != null) player.sendMessage(obj.toString());
+    }
+
+    public static boolean isDebug(){
+        return debug;
     }
 }

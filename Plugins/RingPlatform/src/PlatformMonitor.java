@@ -55,7 +55,9 @@ public class PlatformMonitor {
                     int x = Math.abs(platform.getCenter().getX()- animPlatform.getCenter().getX());
                     int y = Math.abs(platform.getCenter().getY()- animPlatform.getCenter().getY());
                     int z = Math.abs(platform.getCenter().getZ()- animPlatform.getCenter().getZ());
-                    if((x < 5 || z < 5) && (y > 0 && y < 6)){
+                    int width = platform.getWidth();
+                    int height = platform.getHeight();
+                    if((x < width || z < width) && (y > 0 && y < height+1)){
                         result = false;
                         break Loop;
                     }
@@ -92,7 +94,7 @@ public class PlatformMonitor {
         if(result == true){
             Timer timer = new Timer();
             TimerTask task = new AnimateTask(platforms);
-            timer.schedule(task, delay);
+            etc.getServer().addToServerQueue(task, delay);
         }else{
             animations.remove(platforms);
         }

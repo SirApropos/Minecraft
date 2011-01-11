@@ -1,3 +1,10 @@
+V1.04 - 01/10/2011
+-Fixed bug caused by conflictions with threads.
+
+V1.03 - 01/09/2011
+-Fixed bug wherein "special" block placed on center block would cause a NullPointerException.
+-Possibly fixed (or catching) an occasional crash.
+
 V1.02 - 01/09/2011
 -Fixed bug wherein overlapping platforms could be activated simultaneously.
 -Fixed bug wherein torches, ladders, paintings, etc. would not transfer properly and sometimes become duplicated.

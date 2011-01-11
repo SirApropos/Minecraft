@@ -16,6 +16,8 @@
  */
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class Platform {
     private Block center;
@@ -29,6 +31,7 @@ public class Platform {
     private HashMap<Integer, int[]> pruneFrames = new HashMap<Integer, int[]>();
     private ArrayList<Integer> exclude = new ArrayList<Integer>();
     private ArrayList<Integer> special = new ArrayList<Integer>();
+    private static final Logger log = Logger.getLogger("Minecraft");
 
     public Platform(Block center, int[][] shape, int height){
         this.center = center;
@@ -53,21 +56,17 @@ public class Platform {
 
     public void nextFrame(){
         try{
-        currentFrame++;
-        if(pruneFrames.containsKey(currentFrame)){
-            prune();
-        }
-        if(currentFrame <  frames.size()){
-            for(int[] frame : frames.get(currentFrame)){
-                setBlocks(frame[0],frame[1]);
+            currentFrame++;
+            if(pruneFrames.containsKey(currentFrame)){
+                prune();
             }
-        }
-        }catch(ArrayIndexOutOfBoundsException ex){
-            if(currentFrame>0){
-                currentFrame = -1;
-                nextFrame();
-                currentFrame = frames.size();
+            if(currentFrame <  frames.size() && frames.get(currentFrame) != null){
+                for(int[] frame : frames.get(currentFrame)){
+                    setBlocks(frame[0],frame[1]);
+                }
             }
+        }catch(Exception ex){
+            cleanup();
         }
     }
 
@@ -87,9 +86,8 @@ public class Platform {
 
     private void setBlocks(int y, int type){
         for(Block ringBlock : ringBlocks){
-            Block block  = ringBlock.getRelative(0,y,0);
-            block.setType(type);
-            block.update();
+            Block block = new Block(type, ringBlock.getX(), ringBlock.getY()+y, ringBlock.getZ());
+            etc.getServer().setBlock(block);
         }
     }
 
@@ -158,6 +156,7 @@ public class Platform {
                         blockList.add(block);
                         if(special.contains(block.getType())){
                             specialArray[i][j][y-1] = block;
+                            blockArray[i][j][y-1] = null;
                         }else{
                             blockArray[i][j][y-1] = block;
                         }
@@ -180,58 +179,78 @@ public class Platform {
     }
 
     public void setContents(HashMap<String, Object> contents){
-        Block[][][] blockArray = (Block[][][])contents.get("blocks");
-        Block[][][] specialArray = (Block[][][])contents.get("special");
-        int mod = (int)((blockArray.length - 1)/2);
-        int offset = center.getY() - blockArray[mod][mod][0].getY()+1;
-        for(int y = 1;y<=height;y++){
-            for(int i=0;i<blockArray.length;i++){
-                for(int j=0;j<blockArray.length;j++){
-                    if(blockArray[i][j][y-1] != null){
-                        Block block = center.getRelative(i-mod, y, j-mod);
-                        block.setType(blockArray[i][j][y-1].getType());
-                        block.update();
+        try{
+            Block[][][] blockArray = (Block[][][])contents.get("blocks");
+            Block[][][] specialArray = contents.containsKey("special") ? (Block[][][])contents.get("special") : null;
+            int mod = (int)((blockArray.length - 1)/2);
+            int offset = 0;
+            for(int y = 1;y<=height;y++){
+                for(int i=0;i<blockArray.length;i++){
+                    for(int j=0;j<blockArray.length;j++){
+                        if(blockArray[i][j][y-1] != null){
+                            if(offset == 0) offset = center.getY() - blockArray[i][j][y-1].getY()-y+2;
+                            Block block = center.getRelative(i-mod, y, j-mod);
+                            block.setType(blockArray[i][j][y-1].getType());
+                            etc.getServer().setBlock(block);
+                        }
                     }
                 }
             }
-        }
-        for(int y = 1;y<=height;y++){
-            for(int i=0;i<specialArray.length;i++){
-                for(int j=0;j<specialArray.length;j++){
-                    if(specialArray[i][j][y-1] != null){
-                        Block block = center.getRelative(i-mod, y, j-mod);
-                        block.setType(specialArray[i][j][y-1].getType());
-                        if( y < height - 2 && (block.getType() == 64 || block.getType() == 71) && block.getType() == specialArray[i][j][y].getType()){
-                            block.setData(0x4);
-                            Block door = center.getRelative(i-mod, y+1, j-mod);
-                            door.setType(specialArray[i][j][y-1].getType());
-                            door.setData(0x8);
-                            specialArray[i][j][y] = null;
-                            door.update();
-                        }else{
-                            block.setData(specialArray[i][j][y-1].getData());
-                        }
-                        block.update();
-                        if(block.getType()==63 || block.getType() == 68){
-                            Sign sign = (Sign)etc.getServer().getComplexBlock(block);
-                            Sign original = (Sign)etc.getServer().getComplexBlock(specialArray[i][j][y-1]);
-                            if(sign != null && original!=null){
-                                for(i=0;i<3;i++){
-                                    sign.setText(i, original.getText(i));
+            if(specialArray != null){
+                for(int y = 1;y<=height;y++){
+                    for(int i=0;i<specialArray.length;i++){
+                        for(int j=0;j<specialArray.length;j++){
+                            if(specialArray[i][j][y-1] != null){
+                                Block block = center.getRelative(i-mod, y, j-mod);
+                                block.setType(specialArray[i][j][y-1].getType());
+                                if( y < height - 2 && (block.getType() == 64 || block.getType() == 71) && block.getType() == specialArray[i][j][y].getType()){
+                                    block.setData(0x4);
+                                    Block door = center.getRelative(i-mod, y+1, j-mod);
+                                    door.setType(specialArray[i][j][y-1].getType());
+                                    door.setData(0x8);
+                                    specialArray[i][j][y] = null;
+                                    etc.getServer().setBlock(door);
+                                }else{
+                                    block.setData(specialArray[i][j][y-1].getData());
+                                }
+                                etc.getServer().setBlock(block);
+                                if(block.getType()==63 || block.getType() == 68){
+                                    Sign sign = (Sign)etc.getServer().getComplexBlock(block);
+                                    Sign original = (Sign)etc.getServer().getComplexBlock(specialArray[i][j][y-1]);
+                                    if(sign != null && original!=null){
+                                        for(i=0;i<3;i++){
+                                            sign.setText(i, original.getText(i));
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-        }
 
-        for(Player player : (ArrayList<Player>)contents.get("players")){
-            Location loc = player.getLocation();
-            loc.y = loc.y+(double)offset;
-            player.teleportTo(loc);
+            for(Player player : (ArrayList<Player>)contents.get("players")){
+                Location loc = player.getLocation();
+                loc.y = loc.y+(double)offset;
+                player.teleportTo(loc);
+            }
+        }catch(Exception ex){
+            cleanup();
         }
     }
+
+    private void cleanup(){
+        if(currentFrame>0){
+            log.log(Level.SEVERE, "[RingPlatform] An unexpected error has occurred. Forcing cleanup.");
+            if(RingPlatform.isDebug()){
+                log.log(Level.SEVERE, "[RingPlatform] A crashdump log has been created.");
+            }
+            currentFrame = -1;
+            nextFrame();
+            currentFrame = frames.size();
+        }
+    }
+
     public boolean hasNextFrame(){
         boolean result = (currentFrame+1 < frames.size()) ? true : false;
         return result;
@@ -247,5 +266,13 @@ public class Platform {
 
     public Block getCenter(){
         return this.center;
+    }
+
+    public int getWidth(){
+        return shape.length;
+    }
+
+    public int getHeight(){
+        return height;
     }
 }
