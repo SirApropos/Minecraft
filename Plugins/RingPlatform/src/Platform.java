@@ -146,7 +146,7 @@ public class Platform {
         ArrayList<Block> blockList = new ArrayList<Block>();
         ArrayList<Player> playerList = new ArrayList<Player>();
         Block[][][] blockArray = new Block[shape.length][shape.length][5];
-        Block[][][] specialArray = new Block[shape.length][shape.length][5];
+        HashMap<String, Object>[][][] specialArray = new HashMap[shape.length][shape.length][5];
         int mod = (int)((shape.length - 1)/2);
         for(int y = 1;y<=height;y++){
             for(int i=0;i<shape.length;i++){
@@ -154,8 +154,21 @@ public class Platform {
                     if(shape[i][j] == 2){
                         Block block = center.getRelative(i-mod, y, j-mod);
                         blockList.add(block);
-                        if(special.contains(block.getType())){
-                            specialArray[i][j][y-1] = block;
+                        int type = block.getType();
+                        if(special.contains(type)){
+                            HashMap<String, Object> data = new HashMap<String, Object>();
+                            data.put("type", type);
+                            data.put("data", block.getData());
+                            if(type == 63 || type == 68){
+                                //Is a sign.
+                                String[] text = new String[4];
+                                Sign sign = (Sign)etc.getServer().getComplexBlock(block);
+                                for(int k=0;k<4;k++){
+                                    text[k] = sign.getText(k);
+                                }
+                                data.put("signText", text);
+                            }
+                            specialArray[i][j][y-1] = data;
                             blockArray[i][j][y-1] = null;
                         }else{
                             blockArray[i][j][y-1] = block;
@@ -181,7 +194,7 @@ public class Platform {
     public void setContents(HashMap<String, Object> contents){
         try{
             Block[][][] blockArray = (Block[][][])contents.get("blocks");
-            Block[][][] specialArray = contents.containsKey("special") ? (Block[][][])contents.get("special") : null;
+            HashMap<String, Object>[][][] specialArray = (HashMap<String, Object>[][][])contents.get("special");
             int mod = (int)((blockArray.length - 1)/2);
             int offset = 0;
             for(int y = 1;y<=height;y++){
@@ -191,37 +204,41 @@ public class Platform {
                             if(offset == 0) offset = center.getY() - blockArray[i][j][y-1].getY()-y+2;
                             Block block = center.getRelative(i-mod, y, j-mod);
                             block.setType(blockArray[i][j][y-1].getType());
-                            etc.getServer().setBlock(block);
+                            block.update();
                         }
                     }
                 }
             }
-            if(specialArray != null){
-                for(int y = 1;y<=height;y++){
-                    for(int i=0;i<specialArray.length;i++){
-                        for(int j=0;j<specialArray.length;j++){
-                            if(specialArray[i][j][y-1] != null){
-                                Block block = center.getRelative(i-mod, y, j-mod);
-                                block.setType(specialArray[i][j][y-1].getType());
-                                if( y < height - 2 && (block.getType() == 64 || block.getType() == 71) && block.getType() == specialArray[i][j][y].getType()){
-                                    block.setData(0x4);
-                                    Block door = center.getRelative(i-mod, y+1, j-mod);
-                                    door.setType(specialArray[i][j][y-1].getType());
-                                    door.setData(0x8);
+            for(int y = 1;y<=height;y++){
+                for(int i=0;i<specialArray.length;i++){
+                    for(int j=0;j<specialArray.length;j++){
+                        if(specialArray[i][j][y-1] != null){
+                            HashMap<String, Object> data = specialArray[i][j][y-1];
+                            int type = (Integer)data.get("type");
+                            int blockData = (Integer)data.get("data");
+                            Block block = center.getRelative(i-mod, y, j-mod);
+                            block.setType(type);
+                            block.setData(blockData);
+                            if(type == 64 || type == 71){
+                                if( y < height && specialArray[i][j][y] != null && type == specialArray[i][j][y].get("type")){
+                                    Block door = block.getRelative(0, 1, 0);
+                                    door.setType(type);
+                                    door.setData((Integer)specialArray[i][j][y].get("data"));
                                     specialArray[i][j][y] = null;
-                                    etc.getServer().setBlock(door);
+                                    block.update();
+                                    door.update();
                                 }else{
-                                    block.setData(specialArray[i][j][y-1].getData());
+                                    block.setType(0);
                                 }
-                                etc.getServer().setBlock(block);
-                                if(block.getType()==63 || block.getType() == 68){
-                                    Sign sign = (Sign)etc.getServer().getComplexBlock(block);
-                                    Sign original = (Sign)etc.getServer().getComplexBlock(specialArray[i][j][y-1]);
-                                    if(sign != null && original!=null){
-                                        for(i=0;i<3;i++){
-                                            sign.setText(i, original.getText(i));
-                                        }
+                            }
+                            block.update();
+                            if(type==63 || type == 68){
+                                Sign sign = (Sign)etc.getServer().getComplexBlock(block);
+                                if(sign != null && data.containsKey("signText")){
+                                    for(int k=0;k<4;k++){
+                                        sign.setText(k, ((String[])data.get("signText"))[k]);
                                     }
+                                    sign.update();
                                 }
                             }
                         }
@@ -242,9 +259,6 @@ public class Platform {
     private void cleanup(){
         if(currentFrame>0){
             log.log(Level.SEVERE, "[RingPlatform] An unexpected error has occurred. Forcing cleanup.");
-            if(RingPlatform.isDebug()){
-                log.log(Level.SEVERE, "[RingPlatform] A crashdump log has been created.");
-            }
             currentFrame = -1;
             nextFrame();
             currentFrame = frames.size();

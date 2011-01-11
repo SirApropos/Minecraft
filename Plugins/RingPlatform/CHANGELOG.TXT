@@ -1,3 +1,6 @@
+V1.05 - 01/10/2011
+-Fixed signs and doors being teleported.
+
 V1.04 - 01/10/2011
 -Fixed bug caused by conflictions with threads.
 
