@@ -27,13 +27,9 @@ import java.io.*;
 public class WirelessPowerConfig {
     private Map<String,EnumMap<Event,Integer>> permissions= new HashMap<String,EnumMap<Event,Integer>>();
     private static final Logger log = Logger.getLogger("Minecraft");
-    private boolean protectTransmitters = false;
-    private Double transmitterBasePower = 15.0;
     private Map<Integer,Double> boosterBlocks = new HashMap<Integer,Double>();
     private WirelessPowerMonitor monitor;
-    private String table = "Transmitters";
-    private Boolean mysql = false;
-    private String dataFile = "transmitters.dat";
+    private HashMap<String, String> vars = new HashMap<String, String>();
 
     public enum Event{
         createTransmitter("maxtransmitters"),
@@ -57,6 +53,13 @@ public class WirelessPowerConfig {
     }
     private void loadConfig(){
         EnumMap<Event, Integer> perms = new EnumMap<Event, Integer>(Event.class);
+        vars.clear();
+        vars.put("use_mysql","true");
+        vars.put("mysql_table","Transmitters");
+        vars.put("protect_transmitters", "false");
+        vars.put("transmitters_file", "transmitters.dat");
+        vars.put("base_power", "15.0");
+
         perms.put(Event.createChannel, 1);
         perms.put(Event.createTransmitter,-1);
         permissions.put("group:everyone",perms);
@@ -75,13 +78,12 @@ public class WirelessPowerConfig {
                 DataInputStream data = new DataInputStream(stream);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(data));
                 String str;
-                HashMap<String, String> vars = new HashMap<String, String>();
                 while ((str = reader.readLine()) != null){
                     str = str.toLowerCase();
                     if(str.matches("[a-zA-Z0-9_]+=[^=]+")){
                         int i = str.indexOf("=");
                         if(i != -1){
-                            vars.put(str.substring(0, i),str.substring(i+1));
+                            vars.put(str.substring(0, i).toLowerCase(),str.substring(i+1));
                         }
                     }else if(str.matches("perm:[a-zA-Z]+:[a-zA-Z0-9]+:[a-zA-Z0-9]+:-?[0-9]+")){
                         addPermission(str);
@@ -91,7 +93,6 @@ public class WirelessPowerConfig {
                 }
                 data.close();
                 reader.close();
-                setVars(vars);
             }catch (Exception ex){
                 log.log(Level.SEVERE,"Could not read from configuration file.");
             }
@@ -100,11 +101,9 @@ public class WirelessPowerConfig {
 
     private void saveConfig(){
         List<String> lines = new ArrayList<String>();
-        lines.add("protect_transmitters="+Boolean.toString(protectTransmitters));
-        lines.add("base_power="+Double.toString(transmitterBasePower));
-        lines.add("use_mysql="+Boolean.toString(mysql));
-        lines.add("transmitters_file="+dataFile);
-        lines.add("mysql_table="+table);
+        for(String str : vars.keySet()){
+            lines.add(new StringBuilder(str).append("=").append(vars.get(str).toString()).toString());
+        }
         StringBuilder line;
         for(Object key : boosterBlocks.keySet().toArray()){
             int blockType = (Integer)key;
@@ -138,21 +137,6 @@ public class WirelessPowerConfig {
 
     }
 
-    private void setVars(HashMap<String, String> vars){
-        if(vars.containsKey("protect_transmitters")){
-            protectTransmitters = Boolean.parseBoolean(vars.get("protect_transmitters"));
-        }
-        if(vars.containsKey("base_power")){
-            transmitterBasePower = Double.parseDouble(vars.get("base_power"));
-        }
-        if(vars.containsKey("transmitters_file")){
-            dataFile  =  vars.get("transmitters_file");
-        }
-        if(vars.containsKey("mysql_table")){
-            table = vars.get("mysql_table");
-        }
-    }
-
     public void addPermission(String str){
         String[] split = str.split(":");
         //split[1] = user/group, split[2] = playerName, split[3] = permission, split[4] = value
@@ -180,7 +164,7 @@ public class WirelessPowerConfig {
     }
 
     public double getBasePower(){
-        return transmitterBasePower;
+        return Double.parseDouble(vars.get("base_power"));
     }
 
     public double getBoost(Block block){
@@ -221,6 +205,6 @@ public class WirelessPowerConfig {
     }
 
     public boolean isProtected(){
-        return protectTransmitters;
+        return Boolean.parseBoolean(vars.get("protect_transmitters"));
     }
 }

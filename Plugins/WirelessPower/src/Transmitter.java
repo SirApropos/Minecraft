@@ -269,9 +269,9 @@ public class Transmitter {
                     result = false;
                 }
             }
-            if(!result){
-                this.monitor.removeTransmitter(this);
-            }
+        }
+        if(!result){
+            this.monitor.removeTransmitter(this);
         }
         return result;
     }

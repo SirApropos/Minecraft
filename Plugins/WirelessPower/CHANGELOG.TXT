@@ -1,8 +1,14 @@
+V1.12
+-Fixed bug wherein some configuration options were not being saved properly.
+-Fixed bug wherein integrity check was still not completed when the plugin was
+enabled.
+
 V1.11 - 01/12/2011
 -Fixed bug wherein transmitters that were in unloaded chunks when the plugin 
 was  enabled would not be recreated.
 -Fixed bug wherein integrity check was not completed when the plugin was
 enabled, possibly leading to orphaned data.
+-Fixed bug wherein custom filename for transmitter data file would not be registered.
 
 V1.1 - 01/04/2011
 -Added Flatfile support.
