@@ -38,7 +38,7 @@ public abstract class WirelessPowerDataSource {
             Transmitter transmitter = monitor.createTransmitter(
                     (String)obj[0],blocks,(Transmitter.Type)obj[2], (String)obj[3]);
             monitor.addTransmitter(transmitter);
-            System.out.println(Boolean.toString(transmitter.checkIntegrity(true)));
+            transmitter.checkIntegrity(true);
         }
     }
     

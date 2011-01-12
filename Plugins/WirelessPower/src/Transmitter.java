@@ -60,7 +60,7 @@ public class Transmitter {
     }
 
     public Transmitter(WirelessPowerMonitor monitor, String owner, Block[] blocks,
-                Type type, String channel, double range){
+        Type type, String channel, double range){
         this.monitor = monitor;
         this.owner = owner;
         this.blocks.put(Part.BASE, blocks[0]);
