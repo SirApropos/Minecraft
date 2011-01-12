@@ -1,2 +1,6 @@
+V1.1 - 01/12/2011
+-Added ability to assign the /autosneak command to a given user or group to have
+them automatically sneak upon login.
+
 V1.0 - 12/27/2010
 -Initial Version

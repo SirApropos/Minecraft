@@ -30,6 +30,7 @@ public class AutoSneak extends Plugin {
         addListener("COMMAND","MEDIUM");
         addListener("DISCONNECT","MEDIUM");
         addListener("PLAYER_MOVE","MEDIUM");
+        addListener("LOGIN","MEDIUM");
         log.log(Level.INFO, this.name+" Plugin Enabled.");
     }
 

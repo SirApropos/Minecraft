@@ -14,12 +14,9 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import java.util.logging.Logger;
-import java.util.logging.Level;
 import java.util.ArrayList;
 
 public class AutoSneakListener extends PluginListener{
-    private final Logger log  = Logger.getLogger("Minecraft");
     private ArrayList<Player> players = new ArrayList<Player>();
     public AutoSneakListener(){
 
@@ -28,18 +25,68 @@ public class AutoSneakListener extends PluginListener{
     public boolean onCommand(Player player, String[] split) {
         boolean result = false;
         if(split[0].equalsIgnoreCase("/sneak") && player.canUseCommand("/sneak")){
-            if(players.contains(player)){
-                player.sendMessage("§7You have stopped sneaking.");
-                player.setSneaking(false);
-                players.remove(player);
-            }else{
-                players.add(player);
-                player.sendMessage("§7You are now sneaking.");
-                player.setSneaking(true);
-            }
+            toggleSneak(player);
             result = true;
         }
         return result;
+    }
+
+@Override
+    public void onLogin(Player player) {
+        ArrayList<String[]> commandLists = new ArrayList<String[]>();
+        commandLists.add(player.getCommands());
+        for(String groupName : player.getGroups()){
+            for(String[] commands : getRecursiveCommands(groupName)){
+                commandLists.add(commands);
+            }
+        }
+        Loop:
+        for(String[] commands : commandLists){
+            for(String command : commands){
+                if(command.equals("/autosneak")){
+                    setSneak(player, true);
+                    break Loop;
+                }
+            }
+        }
+    }
+
+    private ArrayList<String[]> getRecursiveCommands(String groupName){
+        ArrayList<String[]> commands = new ArrayList<String[]>();
+        Group group = etc.getDataSource().getGroup(groupName);
+        if(group != null){
+            if(group.Commands != null) commands.add(group.Commands);
+            for(String inheritName : group.InheritedGroups){
+                for(String[] groupCommands : getRecursiveCommands(inheritName)){
+                    commands.add(groupCommands);
+                }
+            }
+        }
+        return commands;
+    }
+
+    private void toggleSneak(Player player){
+        if(players.contains(player)){
+            player.sendMessage("§7You have stopped sneaking.");
+            setSneak(player, false);
+        }else{
+            player.sendMessage("§7You are now sneaking.");
+            setSneak(player, true);
+        }
+    }
+
+    private void setSneak(Player player, boolean sneak){
+        if(sneak){
+            player.setSneaking(true);
+            if(!players.contains(player)){
+                players.add(player);
+            }
+        }else{
+            player.setSneaking(false);
+            if(players.contains(player)){
+                players.remove(player);
+            }
+        }
     }
 
 @Override
