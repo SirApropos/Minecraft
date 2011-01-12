@@ -105,8 +105,7 @@ public class Transmitter {
     }
     public boolean isPowered(){
         boolean result = false;
-        int[] coords = getCoords(Part.TORCH);
-        Block block = etc.getServer().getBlockAt(coords[0], coords[1], coords[2]);
+        Block block = getPart(Part.TORCH);
         if(this.type != Type.RECEIVER){
             if(block.getType() == 75){
                 result = true;
@@ -186,7 +185,7 @@ public class Transmitter {
     }
 
     public void changeTorch(boolean power){
-        int blockType = blocks.get(Part.TORCH).getType();
+        int blockType = getPart(Part.TORCH).getType();
         if((power && blockType == 75) || (!power && blockType == 76)){
             int torch = power ? 76 : 75;
             int[] coords = getCoords(Part.TORCH);
@@ -202,8 +201,13 @@ public class Transmitter {
         return getCoords(Part.TORCH);
     }
 
+    private Block getPart(Part part){
+        int[] coords = getCoords(part);
+        return etc.getServer().getBlockAt(coords[0], coords[1], coords[2]);
+    }
+
     private int[] getCoords(Part part){
-        return getCoords(blocks.get(Part.TORCH));
+        return getCoords(blocks.get(part));
     }
 
     private int[] getCoords(Block block){
@@ -249,26 +253,26 @@ public class Transmitter {
 
     public boolean checkIntegrity(boolean full){
         boolean result = false;
-        int coords[];
-        if(this.monitor.isWatched(this)){
-            Block torch = blocks.get(Part.TORCH);
-            torch.refresh();
-            if((torch.getType() == 75 || torch.getType() == 76) && torch.getData() == 0x5){
-                result = true;
+        if(!etc.getServer().isChunkLoaded(getPart(Part.TORCH))){
+            if(this.monitor.isWatched(this)){
+                Block torch = getPart(Part.TORCH);
+                torch.refresh();
+                if((torch.getType() == 75 || torch.getType() == 76) && torch.getData() == 0x5){
+                    result = true;
+                }else{
+                }
+            }
+            if(full){
+                Block base = getPart(Part.BASE);
+                Block sign = getPart(Part.SIGN);
+                if(sign.getType()!=68 || sign.getData()!=blocks.get(Part.SIGN).getData() || base.getType()!=blocks.get(Part.BASE).getType()){
+                    result = false;
+                }
+            }
+            if(!result){
+                this.monitor.removeTransmitter(this);
             }
         }
-        if(full){
-            Block base = blocks.get(Part.BASE).getRelative(0, -1, 0);
-            coords = getCoords(blocks.get(Part.SIGN));
-            Block sign = etc.getServer().getBlockAt(coords[0],coords[1],coords[2]);
-            if(sign.getType()!=68 || sign.getData()!=blocks.get(Part.SIGN).getData() || base.getType()!=blocks.get(Part.BASE).getType()){
-                result = false;
-            }
-        }
-        if(!result){
-            this.monitor.removeTransmitter(this);
-        }
-        
         return result;
     }
 

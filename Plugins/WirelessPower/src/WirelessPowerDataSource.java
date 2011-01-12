@@ -35,8 +35,10 @@ public abstract class WirelessPowerDataSource {
         Block[] blocks;
         for(Object[] obj : loadTransmitters()){
             blocks = getBlocks((String)obj[1]);
-            monitor.addTransmitter(monitor.createTransmitter(
-                    (String)obj[0],blocks,(Transmitter.Type)obj[2], (String)obj[3]));
+            Transmitter transmitter = monitor.createTransmitter(
+                    (String)obj[0],blocks,(Transmitter.Type)obj[2], (String)obj[3]);
+            monitor.addTransmitter(transmitter);
+            System.out.println(Boolean.toString(transmitter.checkIntegrity(true)));
         }
     }
     
@@ -49,7 +51,7 @@ public abstract class WirelessPowerDataSource {
         return blocks;
     }
 
-    public String getBlockString(Block block){
+     public static String getBlockString(Block block){
         StringBuilder blockString = new StringBuilder();
         blockString.append(Integer.toString(block.getX())).append(":");
         blockString.append(Integer.toString(block.getY())).append(":");
@@ -63,7 +65,12 @@ public abstract class WirelessPowerDataSource {
         for(int i=0;i<strings.length;i++){
             coords[i] = Integer.parseInt(strings[i]);
         }
-        return etc.getServer().getBlockAt(coords[0], coords[1], coords[2]);
+        if(etc.getServer().isChunkLoaded(coords[0], coords[1], coords[2])){
+            //isChunkLoaded returns the opposite of what is expected.
+            etc.getServer().loadChunk(coords[0], coords[1], coords[2]);
+        }
+        Block block = etc.getServer().getBlockAt(coords[0], coords[1], coords[2]);
+        return block;
     }
 
     protected String getBlockStrings(Block[] blocks){

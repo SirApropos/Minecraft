@@ -217,7 +217,8 @@ public class WirelessPowerMonitor {
         Double power = 0.0;
         if(blockType != Transmitter.Type.RECEIVER){
             power = config.getBasePower();
-                power = power*config.getBoost(blocks[0]);
+            power = power*config.getBoost(blocks[0]);
+            System.out.println("Type: "+Integer.toString(blocks[0].getType()) + "/Range: "+Double.toString(power));
         }
         return new Transmitter(this, owner, blocks, blockType, channel, power);
     }

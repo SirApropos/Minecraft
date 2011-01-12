@@ -33,7 +33,7 @@ public class WirelessPowerConfig {
     private WirelessPowerMonitor monitor;
     private String table = "Transmitters";
     private Boolean mysql = false;
-    private String file = "transmitters.dat";
+    private String dataFile = "transmitters.dat";
 
     public enum Event{
         createTransmitter("maxtransmitters"),
@@ -103,7 +103,7 @@ public class WirelessPowerConfig {
         lines.add("protect_transmitters="+Boolean.toString(protectTransmitters));
         lines.add("base_power="+Double.toString(transmitterBasePower));
         lines.add("use_mysql="+Boolean.toString(mysql));
-        lines.add("transmitters_file="+file);
+        lines.add("transmitters_file="+dataFile);
         lines.add("mysql_table="+table);
         StringBuilder line;
         for(Object key : boosterBlocks.keySet().toArray()){
@@ -144,6 +144,9 @@ public class WirelessPowerConfig {
         }
         if(vars.containsKey("base_power")){
             transmitterBasePower = Double.parseDouble(vars.get("base_power"));
+        }
+        if(vars.containsKey("transmitters_file")){
+            dataFile  =  vars.get("transmitters_file");
         }
         if(vars.containsKey("mysql_table")){
             table = vars.get("mysql_table");

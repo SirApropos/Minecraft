@@ -1,3 +1,9 @@
+V1.11 - 01/12/2011
+-Fixed bug wherein transmitters that were in unloaded chunks when the plugin 
+was  enabled would not be recreated.
+-Fixed bug wherein integrity check was not completed when the plugin was
+enabled, possibly leading to orphaned data.
+
 V1.1 - 01/04/2011
 -Added Flatfile support.
 -Removed debug information (console logging)
