@@ -134,7 +134,10 @@ public class ObituaryListener extends PluginListener {
                 Block block1 = getBlockAtPlayer(player, 1);
                 Block block2 = getBlockAtPlayer(player, 0);
                 List<Integer> safeBlocks = Arrays.asList(0,6,8,9,10,11,37,38,39,40,44,51,53,55,63,64,65,66,67,68,69,70,71,72,75,76,77,78,83,85,90);
-                if(safeBlocks.contains(block1.getType()) && safeBlocks.contains(block2.getType())){
+                if(player.getY() < 0.0){
+                    vars.put("message",getMessage("void"));
+
+                }else if(safeBlocks.contains(block1.getType()) && safeBlocks.contains(block2.getType())){
                     vars.put("message",getMessage("unknown"));
                 }else{
                     vars.put("message",getMessage("suffocate"));
@@ -217,30 +220,62 @@ public class ObituaryListener extends PluginListener {
 
     public void enable(){
         loadMessages();
-        File file = new File("obituary.txt");
+        File file1 = new File("obituary.txt");
+        File file2 = new File("obituary_messages.txt");
+        if(file2.exists()){
+            ArrayList<String> lines = new ArrayList<String>();
+            lines.addAll(readFile(file1));
+            lines.addAll(readFile(file2));
+            lines.add("void:<cc><player> fell into the abyss.");
+            writeFile(lines);
+            file2.delete();
+        }
+        if(file1.exists()) file1.delete();
         logging =  0x0;
-        if(file.exists() && file.canRead()){
-            PropertiesFile config = new PropertiesFile("obituary.txt");
-            if(config.getBoolean("log_to_console",false)) logging+=0x1;
-            if(config.getBoolean("log_to_twitter",false)) logging+=0x2;
+        PropertiesFile config = new PropertiesFile("Obituary.properties");
+        if(config.getBoolean("log_to_console",false)) logging+=0x1;
+        if(config.getBoolean("log_to_twitter",false)) logging+=0x2;
+    }
+    
+    private void writeFile(ArrayList<String> lines){
+        try {
+            FileWriter stream = new FileWriter("Obituary.properties");
+            BufferedWriter writer = new BufferedWriter(stream);
+            for(String ln : lines){
+                writer.write(ln);
+                writer.newLine();
+            }
+            writer.close();
+        }catch (Exception ex){
+          log.log(Level.SEVERE,"Error writing file: " + ex.getMessage());
         }
     }
 
-    private void loadMessages(){
-        messages.clear();
-        File file = new File("obituary_messages.txt");
+    private ArrayList<String> readFile(File file){
+        ArrayList<String> lines = new ArrayList<String>();
         if(file.exists()){
             try {
-                FileInputStream stream = new FileInputStream("obituary_messages.txt");
+                FileInputStream stream = new FileInputStream(file);
                 DataInputStream data = new DataInputStream(stream);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(data));
                 String str;
                 while ((str = reader.readLine()) != null){
-                    addMessage(str);
+                    lines.add(str);
                 }
                 data.close();
             }catch (Exception ex){
               System.err.println("Error: " + ex.getMessage());
+            }
+        }
+        return lines;
+    }
+
+    private void loadMessages(){
+        messages.clear();
+        File file = new File("Obituary.properties");
+        if(file.exists()){
+            for(String line : readFile(file)){
+                addMessage(line);
             }
         }else{
             log.log(Level.SEVERE,"File obituary_messages.txt does not exist. Please copy it from the JAR or refer to the plugin documenation.");

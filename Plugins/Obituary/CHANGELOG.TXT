@@ -1,3 +1,7 @@
+v1.3 - 01/15/2011
+-Added "void" death message.
+-Consolidated both data files into the new Obituary.properties.
+
 v1.2 - 01/02/2011
 -Added log_to_console and log_to_twitter (TwitterEvents required) options in obituary.txt.
 -Fixed bug wherein players who logged in while dead would trigger a death message.
