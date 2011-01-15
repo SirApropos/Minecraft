@@ -15,67 +15,73 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class RingPlatformListener extends PluginListener{
+    public static final RingPlatformConfig config = new RingPlatformConfig();
     private final PlatformMonitor monitor = new PlatformMonitor();
-    int[][] shape;
-    int[][] ringShape;
-    int height;
+    private ArrayList<HashMap<String, Object>> shapes = new ArrayList<HashMap<String, Object>>();
     public void RingPlatformListener(){
         
     }
 
-    public void loadShape(){
-        this.shape = new int[][]{
-            {0,1,1,1,0},
-            {1,1,2,1,1},
-            {1,2,1,2,1},
-            {1,1,2,1,1},
-            {0,1,1,1,0}};
-        this.ringShape = new int[][]{
-            {0,1,1,1,0},
-            {1,2,2,2,1},
-            {1,2,2,2,1},
-            {1,2,2,2,1},
-            {0,1,1,1,0}};
-        this.height = 5;
+    public void loadShapes(){
+        config.load();
+        this.shapes = config.getShapes();        
     }
 
 @Override
     public void onBlockRightClicked(Player player, Block blockClicked, Item item) {
-        ArrayList<Platform> platforms= new ArrayList<Platform>();
-        if(isAPlatform(blockClicked) && monitor.getPlatform(blockClicked) == null){
-            platforms.add(new Platform(blockClicked, ringShape, height));
-            int y = blockClicked.getY();
-            int i = y + 6;
-            while(i > (y + 5) || i < (y - 5)){
-                if(i < 122){
-                    Block block = blockClicked.getRelative(0, i - y, 0);
-                    if(block.getType() == blockClicked.getType()){
-                        if(isAPlatform(block)){
-                            platforms.add(new Platform(block, ringShape, height));
-                            i=i+5;
+        if(!config.checkPerms() || player.canUseCommand("/ringplatform")){
+            ArrayList<Platform> platforms= new ArrayList<Platform>();
+            int platformType = getPlatformType(blockClicked);
+            if(platformType >=0 && monitor.getPlatform(blockClicked) == null){
+                HashMap<String, Object> shape = shapes.get(platformType);
+                platforms.add(new Platform(blockClicked, (int[][])shape.get("teleportShape"), (Integer)shape.get("height")));
+                int y = blockClicked.getY();
+                int height = (Integer)shape.get("height");
+                int i = y + height + 1;
+                int platformsInStack = 1;
+                while((platformsInStack < config.maxPlatformsInStack()) && i > (y + height) || i < (y - height)){
+                    if(i < 128 - height - 1){
+                        Block block = blockClicked.getRelative(0, i - y, 0);
+                        if(block.getType() == blockClicked.getType()){
+                            if(isPlatform(block, (int[][])shapes.get(platformType).get("platformShape"))){
+                                platforms.add(new Platform(block, (int[][])shape.get("teleportShape"), (Integer)shape.get("height")));
+                                i=i+height;
+                            }
                         }
+                        i++;
+                    }else{
+                        i = 0;
                     }
-                    i++;
-                }else{
-                    i = 0;
                 }
-            }
-            if(platforms.size() > 1){
-                monitor.animate(platforms);
+                if(platforms.size() > 1){
+                    monitor.animate(platforms, config.getAnimations((ArrayList<String>)shape.get("animations")));
+                }
             }
         }
     }
 
-    private boolean isAPlatform(Block block){
+    private int getPlatformType(Block block){
+        int result = -1;
+        for(HashMap<String, Object> shape : shapes){
+            if(isPlatform(block,(int[][])shape.get("platformShape"))){
+                result = shapes.indexOf(shape);
+                break;
+            }
+        }
+        return result;
+    }
+
+    private boolean isPlatform(Block block, int[][] shape){
         int type = block.getType();
-        int mod = (int)((this.shape.length - 1)/2);
+        int mod = (int)((shape.length - 1)/2);
         Integer compareType = null;
         boolean result = true;
         Loop:
         for(int i=0;i<shape.length;i++){
-            for(int j=0;j<this.shape.length;j++){
+            for(int j=0;j<shape.length;j++){
                 int compare = block.getRelative(i-mod, 0, j-mod).getType();
                 if(shape[i][j] == 2){
                     if(compareType == null){
@@ -95,6 +101,7 @@ public class RingPlatformListener extends PluginListener{
         }
         return result;
     }
+
 @Override
     public boolean onExplode(Block block) {
         return monitor.canExplode(block);

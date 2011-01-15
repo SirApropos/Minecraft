@@ -17,25 +17,19 @@
 
 import java.util.HashMap;
 import java.util.ArrayList;
-import java.util.Timer;
 import java.util.TimerTask;
 
 public class PlatformMonitor {
-    private ArrayList<ArrayList<Platform>> animations = new ArrayList<ArrayList<Platform>>();
-    private Long delay = 100L;
+    private ArrayList<ArrayList<Platform>> platformSets = new ArrayList<ArrayList<Platform>>();
+    private HashMap<ArrayList<Platform>, ArrayList<Animation>> animationSets = new HashMap<ArrayList<Platform>, ArrayList<Animation>>();
 
     public PlatformMonitor(){
-
-    }
-
-    public boolean isTeleporting(Platform platform){
-        return false;
     }
 
     public Platform getPlatform(Block center){
         Platform result = null;
         Find:
-        for(ArrayList<Platform> animation : animations){
+        for(ArrayList<Platform> animation : platformSets){
             for(Platform platform : animation){
                 if(platform.getCenter().equals(center)){
                     result = platform;
@@ -46,10 +40,10 @@ public class PlatformMonitor {
         return result;
     }
 
-    public void animate(ArrayList<Platform> platforms){
+    public void animate(ArrayList<Platform> platforms, ArrayList<HashMap<String, Object>> animationsInfo){
         boolean result = true;
         Loop:
-        for(ArrayList<Platform> animation : animations){
+        for(ArrayList<Platform> animation : platformSets){
             for(Platform animPlatform : animation){
                 for(Platform platform : platforms){
                     int x = Math.abs(platform.getCenter().getX()- animPlatform.getCenter().getX());
@@ -65,8 +59,19 @@ public class PlatformMonitor {
             }
         }
         if(result){
-            animations.add(platforms);
-            nextFrame(platforms);
+            ArrayList<Animation> animations = new ArrayList<Animation>();
+            for(HashMap<String, Object> animationInfo : animationsInfo){
+                Animation animation = new Animation(animationInfo);
+                for(Platform platform : platforms){
+                    animation.addAnimationPoint(platform.getCenter());
+                }
+                animations.add(animation);
+            }
+            platformSets.add(platforms);
+            animationSets.put(platforms, animations);
+            for(Animation animation : animations){
+                nextFrame(platforms, animation);
+            }
         }
     }
 
@@ -81,51 +86,43 @@ public class PlatformMonitor {
         platforms.get(0).setContents(contents.get(contents.size()-1));
     }
 
-    public void nextFrame(ArrayList<Platform> platforms){
-        boolean result = false;
-        for(Platform platform : platforms){
-            platform.nextFrame();
+    public void nextFrame(ArrayList<Platform> platforms, Animation animation){
+        animation.nextFrame();
+        if(animation.isTeleportFrame()){
+            teleport(platforms);
         }
-        Platform platform = platforms.get(0);
-        if(platform != null){
-            if(platform.isTeleportFrame()) teleport(platforms);
-            if(platform.hasNextFrame()) result = true;
-        }
-        if(result == true){
-            Timer timer = new Timer();
-            TimerTask task = new AnimateTask(platforms);
-            etc.getServer().addToServerQueue(task, delay);
+        if(animation.hasNextFrame()){
+            TimerTask task = new AnimateTask(platforms, animation);
+            etc.getServer().addToServerQueue(task, animation.getDelay());
         }else{
-            animations.remove(platforms);
+            platformSets.remove(platforms);
+            animationSets.remove(platforms);
         }
     }
 
     private class AnimateTask extends TimerTask{
         private ArrayList<Platform> platforms;
+        private Animation animation;
 
-        public AnimateTask(ArrayList<Platform> platforms){
+        public AnimateTask(ArrayList<Platform> platforms, Animation animation){
             this.platforms = platforms;
+            this.animation = animation;
         }
 
         public void run(){
-            nextFrame(platforms);
+            nextFrame(platforms, animation);
         }
     }
 
     public boolean canExplode(Block block){
         boolean result = false;
         Loop:
-        for(ArrayList<Platform> platforms : animations){
-            for(Platform platform : platforms){
-                if(platform.isProtectedFrame()){
-                    double x = platform.getCenter().getX() - block.getX();
-                    double y = platform.getCenter().getY() - block.getY();
-                    double z = platform.getCenter().getZ() - block.getZ();
-                    double dist = Math.sqrt(Math.pow(x,2) + Math.pow(y,2) + Math.pow(z,2));
-                    if(dist < 10.0){
-                        result = true;
-                        break Loop;
-                    }
+        for(ArrayList<Platform> key : animationSets.keySet()){
+            ArrayList<Animation> animations = animationSets.get(key);
+            for(Animation animation : animations){
+                if(animation.isDenyExplode(block)){
+                    result = true;
+                    break Loop;
                 }
             }
         }

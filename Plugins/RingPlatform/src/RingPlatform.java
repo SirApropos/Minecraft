@@ -17,20 +17,19 @@
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
-import java.util.List;
 import java.util.ArrayList;
 
 public class RingPlatform extends Plugin {
-    private static final Logger log = Logger.getLogger("Minecraft");
     private String name = "RingPlatform";
-    private List<PluginRegisteredListener> listeners = new ArrayList<PluginRegisteredListener>();
+    private static final Logger log = Logger.getLogger("Minecraft");
     private final RingPlatformListener listener = new RingPlatformListener();
+    private ArrayList<PluginRegisteredListener> listeners = new ArrayList<PluginRegisteredListener>();
 
     public void enable(){
         addListener("BLOCK_RIGHTCLICKED","MEDIUM");
         addListener("EXPLODE","MEDIUM");
-        listener.loadShape();
         log.log(Level.INFO, this.name+" Plugin Enabled.");
+        listener.loadShapes();
     }
 
     public void disable(){
@@ -52,9 +51,5 @@ public class RingPlatform extends Plugin {
 @Override
     public void initialize() {
 
-    }
-    public static void debug(Object obj){
-        Player player = etc.getServer().getPlayer("Apropos");
-        if(player != null) player.sendMessage(obj.toString());
     }
 }

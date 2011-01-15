@@ -1,3 +1,10 @@
+V1.1 - 01/15/2011
+-Completely restructured how animations and platforms were handled.
+-Added option to change virtually every variable used.
+-Added support for multiple platforms.
+-Added support for multiple animations.
+-Added support for multiple animations per platform.
+
 V1.05 - 01/10/2011
 -Fixed signs and doors being teleported.
 
