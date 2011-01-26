@@ -115,7 +115,7 @@ public class ObituaryListener extends PluginListener {
                         }
                     }else if(attacker.isMob()){
                         try{
-                            String name = OEntityList.b(attacker.getEntity());
+                            String name = in.b(attacker.getEntity());
                             vars.put("killer",name);
                             name = name.toLowerCase();
                             if(messages.containsKey(name)){
@@ -144,11 +144,6 @@ public class ObituaryListener extends PluginListener {
                 }
             }
             broadcastMessage(createDeathMessage(vars));
-            pendingDeaths.put(player, new Object[]{null});
-        }else{
-            if(pendingDeaths.containsKey(player)){
-                pendingDeaths.remove(player);
-            }
         }
         return false;
     }
