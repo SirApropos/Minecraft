@@ -253,7 +253,7 @@ public class Transmitter {
 
     public boolean checkIntegrity(boolean full){
         boolean result = false;
-        if(!etc.getServer().isChunkLoaded(getPart(Part.TORCH))){
+        if(etc.getServer().isChunkLoaded(getPart(Part.TORCH))){
             if(this.monitor.isWatched(this)){
                 Block torch = getPart(Part.TORCH);
                 torch.refresh();

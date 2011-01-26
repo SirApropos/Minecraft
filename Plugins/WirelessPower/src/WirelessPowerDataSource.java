@@ -65,7 +65,7 @@ public abstract class WirelessPowerDataSource {
         for(int i=0;i<strings.length;i++){
             coords[i] = Integer.parseInt(strings[i]);
         }
-        if(etc.getServer().isChunkLoaded(coords[0], coords[1], coords[2])){
+        if(!etc.getServer().isChunkLoaded(coords[0], coords[1], coords[2])){
             //isChunkLoaded returns the opposite of what is expected.
             etc.getServer().loadChunk(coords[0], coords[1], coords[2]);
         }
