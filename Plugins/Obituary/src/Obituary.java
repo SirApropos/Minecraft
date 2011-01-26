@@ -34,7 +34,7 @@ public class Obituary extends Plugin {
         listener.enable();
         log.log(Level.INFO, this.name+" Plugin Enabled.");
         try{
-           in.class.getMethod("b", new Class[]{ep.class});
+           OEntityList.class.getMethod("b", new Class[]{OEntity.class});
         }catch(Exception ex){
             log.log(Level.WARNING,"Obituary plugin does not match server version?");
         }
