@@ -1,5 +1,5 @@
 ========================
-Obituary Plugin for hMod (Created by Apropos <sir.apropos.of.nothign@gmail.com>)
+Obituary Plugin for hMod (Created by Apropos <Apropos.of.nothing@gmx.com>)
 ========================
 
 This plugin requires build 131+ of hMod.
